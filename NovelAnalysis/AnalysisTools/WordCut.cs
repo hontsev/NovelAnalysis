@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+ 
 
 using JiebaNet.Analyser;
 using JiebaNet.Segmenter;
@@ -13,16 +14,36 @@ namespace NovelAnalysis
 {
     public class WordCut
     {
-        private Form1 mainForm;
+        //private Form1 mainForm;
+        private DataController dc;
+        private MyDelegate.sendStringDelegate printEvent;
 
-        public WordCut(Form1 mainf,string preString)
+        public WordCut(DataController data,string preString,MyDelegate.sendStringDelegate pevent)
         {
-            mainForm = mainf;
-            mainForm.dc.preResult = new List<List<string>>();
-            mainForm.dc.sentences = new List<Sentence>();
+            this.printEvent = pevent;
+            dc = data;
+            dc.preResult = new List<List<string>>();
+            dc.sentences = new List<Sentence>();
             //mainForm.dc.fileinfo = new List<FileInfo>();
-            mainForm.dc.preContent = preString;
+            dc.preContent = preString;
             
+        }
+
+        private void print(string str)
+        {
+            if (printEvent != null)
+            {
+                printEvent(str);
+            }
+        }
+
+        private static string removeBlanks(string ori)
+        {
+            string[] blanks = { "\t", " ", "　", "\r" };
+            string res = ori;
+            foreach (var b in blanks) res = res.Replace(b,string.Empty);
+            return res;
+
         }
 
         /// <summary>
@@ -30,22 +51,24 @@ namespace NovelAnalysis
         /// </summary>
         public void workCutSentence()
         {
-            mainForm.dc.preResult = new List<List<string>>();
-            mainForm.print("开始分割句子和段落。");
-            string[] paragraphs = mainForm.dc.preContent.Split('\n');
+            dc.preResult = new List<List<string>>();
+            print("开始分割句子和段落。");
+            string[] paragraphs = dc.preContent.Split('\n');
             foreach (var parag in paragraphs)
             {
                 List<string> thisparag = new List<string>();
-                Regex regex = new Regex("[^。？！；]+[。？！；]?");
-                var res = regex.Matches(parag);
+                Regex regex = new Regex("[^。？！；…]+[。？！；…”’』」]*(?=[^。？！；…”’』」]*)");
+                var res = regex.Matches(removeBlanks(parag));
                 foreach (var ress in res)
                 {
                     if (ress.ToString().Length >= 2)
                         thisparag.Add(ress.ToString());
                 }
-                mainForm.dc.preResult.Add(thisparag);
+                if (thisparag.Count == 0) continue;
+                dc.preResult.Add(thisparag);
             }
-            mainForm.print("分割完成。");
+            
+            print("分割完成。");
         }
 
         /// <summary>
@@ -53,19 +76,27 @@ namespace NovelAnalysis
         /// </summary>
         public void workCutString()
         {
-            mainForm.dc.sentences = null;
-            mainForm.dc.sentences = new List<Sentence>();
-            mainForm.print("开始分词。共有" + mainForm.dc.preResult.Count() + "个段落");
+            dc.sentences = null;
+            dc.sentences = new List<Sentence>();
+            print("开始分词。");
             try
             {
                 MyDelegate.sendIntDelegate cutWordEvent=new MyDelegate.sendIntDelegate(workCutParagraph);
-                MultiThreadingController mtc = new MultiThreadingController(mainForm.dc.preResult.Count(), cutWordEvent);
+                MultiThreadingController mtc = new MultiThreadingController(dc.preResult.Count(), cutWordEvent);
                 mtc.bStart();
-                mainForm.print("分词结束");
+                print("分词结束");
             }
             catch (Exception e)
             {
-                mainForm.print(e.Message);
+                print(e.Message);
+            }
+        }
+
+        public void workSortSentences()
+        {
+            foreach (var f in dc.fileinfo)
+            {
+                f.sentences.Sort();
             }
         }
 
@@ -75,19 +106,35 @@ namespace NovelAnalysis
         private void workCutParagraph(int nowNum)
         {
             PosSegmenter segmenter = new PosSegmenter();
-            mainForm.print("正在对第" + nowNum + "段分词（共" + mainForm.dc.preResult.Count + "段，" + Math.Round((double)nowNum * 100.0 / mainForm.dc.preResult.Count, 2) + "%）");
+            print(string.Format("正在对第{0}段分词（共{1}段，{2}%）", 
+                nowNum, 
+                dc.preResult.Count, 
+                Math.Round((double)nowNum * 100.0 / dc.preResult.Count, 
+                2)
+                ));
             try
             {
-                for (int j = 0; j < mainForm.dc.preResult[nowNum].Count; j++)
+                for (int j = 0; j < dc.preResult[nowNum].Count; j++)
                 {
-                    var words = segmenter.Cut(mainForm.dc.preResult[nowNum][j]);
-                    Sentence s = new Sentence(nowNum, j, words);
-                    mainForm.dc.sentences.Add(s);
+                    try
+                    {
+                        //对单句分词
+                        var words = segmenter.Cut(dc.preResult[nowNum][j]);
+                        //标注句子索引
+                        Sentence s = new Sentence(nowNum, j, words);
+
+                        dc.sentences.Add(s);
+                    }
+                    catch
+                    {
+                        Sentence s = new Sentence(nowNum, j, new List<Pair>());
+                        dc.sentences.Add(s);
+                    }                   
                 }
             }
             catch (Exception ex)
             {
-                mainForm.print("分词失败：" + ex.Message);
+                print("分词失败：" + ex.Message);
             }
         }
 
@@ -100,10 +147,11 @@ namespace NovelAnalysis
             //修正：从全文分词结果来看，将被错误分割的词拼接起来
             tmpWordInfo = new List<Pair>();
             List<Pair> tmpChangeWordInfo = new List<Pair>();
-            foreach (var f in mainForm.dc.fileinfo)
+            foreach (var f in dc.fileinfo)
             {
-                foreach (var s in f.sentneces)
+                foreach (var s in f.sentences)
                 {
+                    if (s == null) continue;
                     foreach (var w in s.words)
                     {
                         if (w.Word.Length > 1 && isInList(tmpWordInfo, w))
@@ -119,11 +167,12 @@ namespace NovelAnalysis
             }
             //修正：以出现频率较高的人名为基准，将未正确分割的含人名的词分开
             List<WordInfo> tmpWord = new List<WordInfo>();
-            foreach (var f in mainForm.dc.fileinfo)
+            foreach (var f in dc.fileinfo)
             {
-                foreach (var s in f.sentneces)
+                foreach (var s in f.sentences)
                 {
-                    mainForm.print("人名修正 - 词频统计（第" + (mainForm.dc.fileinfo.IndexOf(f) + 1) + "篇" + (f.sentneces.ToList().IndexOf(s) + 1) + "句)");
+                    if (s == null) continue;
+                    //mainForm.print("人名修正 - 词频统计（第" + (mainForm.dc.fileinfo.IndexOf(f) + 1) + "篇" + (f.sentneces.ToList().IndexOf(s) + 1) + "句)");
                     foreach (var w in s.words)
                     {
                         if (w.Word.Length > 1 && w.Flag == "nr")
@@ -156,7 +205,7 @@ namespace NovelAnalysis
                     resetCuts_Cut(p);
                 }
             }
-            mainForm.print("修正分词结果完毕。");
+            //mainForm.print("修正分词结果完毕。");
         }
 
         /// <summary>
@@ -190,28 +239,28 @@ namespace NovelAnalysis
         }
 
         /// <summary>
-        /// 将全部分词结果中包含给定单词的长词以给定词为基准分为两个词。新词标注为动词v
+        /// 将全部分词结果中包含给定单词的长词以给定词为基准分为两个词。新词标注为未知词u
         /// </summary>
         /// <param name="word"></param>
         private void resetCuts_Cut(Pair word)
         {
-            mainForm.print("修正词汇：" + word.Word);
-            for (int i = 0; i < mainForm.dc.fileinfo.Count; i++)
+            //mainForm.print("修正词汇：" + word.Word);
+            for (int i = 0; i < dc.fileinfo.Count; i++)
             {
-                for (int j = 0; j < mainForm.dc.fileinfo[i].sentneces.Count(); j++)
+                for (int j = 0; j < dc.fileinfo[i].sentences.Count(); j++)
                 {
                     List<Pair> tmpwords = new List<Pair>();
-                    int maxlen = mainForm.dc.fileinfo[i].sentneces[j].words.Count();
+                    int maxlen = dc.fileinfo[i].sentences[j].words.Count();
                     for (int k = 0; k < maxlen; k++)
                     {
-                        Pair tmpword = mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k];
+                        Pair tmpword = dc.fileinfo[i].sentences[j].words.ToArray()[k];
                         int n = tmpword.Word.IndexOf(word.Word);
                         if (tmpword.Word != word.Word
                             && n >= 0
                             )
                         {
                             string newWord = tmpword.Word.Substring(n + word.Word.Length, tmpword.Word.Length - n - word.Word.Length);
-                            Pair p = new Pair(newWord, "v");
+                            Pair p = new Pair(newWord, "u");
                             tmpwords.Add(word);
                             tmpwords.Add(p);
                             k++;
@@ -221,7 +270,7 @@ namespace NovelAnalysis
                             tmpwords.Add(tmpword);
                         }
                     }
-                    mainForm.dc.fileinfo[i].sentneces[j].words = tmpwords;
+                    dc.fileinfo[i].sentences[j].words = tmpwords;
                 }
             }
         }
@@ -235,22 +284,22 @@ namespace NovelAnalysis
         /// <param name="word"></param>
         private void resetCuts_Link(Pair word)
         {
-            mainForm.print("修正词汇：" + word.Word);
-            for (int i = 0; i < mainForm.dc.fileinfo.Count; i++)
+            //mainForm.print("修正词汇：" + word.Word);
+            for (int i = 0; i < dc.fileinfo.Count; i++)
             {
-                for (int j = 0; j < mainForm.dc.fileinfo[i].sentneces.Count(); j++)
+                for (int j = 0; j < dc.fileinfo[i].sentences.Count(); j++)
                 {
                     List<Pair> tmpwords = new List<Pair>();
-                    int maxlen = mainForm.dc.fileinfo[i].sentneces[j].words.Count();
+                    int maxlen = dc.fileinfo[i].sentences[j].words.Count();
                     for (int k = 0; k < maxlen; k++)
                     {
                         if (k < maxlen - 1
                             &&
                             word.Word
                             ==
-                            mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k].Word
+                            dc.fileinfo[i].sentences[j].words.ToArray()[k].Word
                             +
-                            mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 1].Word
+                            dc.fileinfo[i].sentences[j].words.ToArray()[k + 1].Word
                         )
                         {
                             tmpwords.Add(word);
@@ -260,11 +309,11 @@ namespace NovelAnalysis
                             &&
                             word.Word
                             ==
-                            mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k].Word
+                            dc.fileinfo[i].sentences[j].words.ToArray()[k].Word
                             +
-                            mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 1].Word
+                            dc.fileinfo[i].sentences[j].words.ToArray()[k + 1].Word
                             +
-                            mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 2].Word
+                            dc.fileinfo[i].sentences[j].words.ToArray()[k + 2].Word
                         )
                         {
                             tmpwords.Add(word);
@@ -274,13 +323,13 @@ namespace NovelAnalysis
                            &&
                            word.Word
                            ==
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 1].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 1].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 2].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 2].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 3].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 3].Word
                         )
                         {
                             tmpwords.Add(word);
@@ -290,15 +339,15 @@ namespace NovelAnalysis
                            &&
                            word.Word
                            ==
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 1].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 1].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 2].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 2].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 3].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 3].Word
                            +
-                           mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k + 4].Word
+                           dc.fileinfo[i].sentences[j].words.ToArray()[k + 4].Word
                         )
                         {
                             tmpwords.Add(word);
@@ -306,10 +355,10 @@ namespace NovelAnalysis
                         }
                         else
                         {
-                            tmpwords.Add(mainForm.dc.fileinfo[i].sentneces[j].words.ToArray()[k]);
+                            tmpwords.Add(dc.fileinfo[i].sentences[j].words.ToArray()[k]);
                         }
                     }
-                    mainForm.dc.fileinfo[i].sentneces[j].words = tmpwords;
+                    dc.fileinfo[i].sentences[j].words = tmpwords;
                 }
             }
         }

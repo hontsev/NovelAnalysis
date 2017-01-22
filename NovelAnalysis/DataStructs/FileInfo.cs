@@ -13,6 +13,6 @@ namespace NovelAnalysis
         public int paragraphNum;
         public int sentenceNum;
         public string summary;
-        public Sentence[] sentneces;
+        public List<Sentence> sentences;
     }
 }

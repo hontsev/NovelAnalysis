@@ -9,23 +9,24 @@ namespace NovelAnalysis
 {
     public class WordAnalysis
     {
-        private Form1 mainForm;
+        private DataController dc;
+        //private Form1 mainForm;
 
-        public WordAnalysis(Form1 mainf)
+        public WordAnalysis(DataController data)
         {
-            mainForm = mainf;
+            this.dc = data;
         }
 
         public void initAnalysis()
         {
-            mainForm.dc.wordinfo = null;
-            mainForm.dc.wordinfo = new List<WordInfo>();
+            dc.wordinfo = null;
+            dc.wordinfo = new List<WordInfo>();
         }
 
         public List<WordInfo> getResult()
         {
-            mainForm.dc.wordinfo.Sort();
-            return mainForm.dc.wordinfo;
+            dc.wordinfo.Sort();
+            return dc.wordinfo;
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace NovelAnalysis
         /// <param name="sentence"></param>
         public void addWordRecord(Pair word,Sentence sentence)
         {
-            foreach (WordInfo winfo in mainForm.dc.wordinfo)
+            foreach (WordInfo winfo in dc.wordinfo)
             {
                 if (word.Word == winfo.word)
                 {
@@ -50,7 +51,7 @@ namespace NovelAnalysis
             newwinfo.wordType = word.Flag;
             newwinfo.appearSentences = new List<Sentence>();
             newwinfo.appearSentences.Add(sentence);
-            mainForm.dc.wordinfo.Add(newwinfo);
+            dc.wordinfo.Add(newwinfo);
         }
 
         /// <summary>
@@ -87,9 +88,9 @@ namespace NovelAnalysis
         public List<string> getItemStrings(string itemStr)
         {
             List<string> res = new List<string>();
-            foreach (FileInfo file in mainForm.dc.fileinfo)
+            foreach (FileInfo file in dc.fileinfo)
             {
-                foreach (Sentence sen in file.sentneces)
+                foreach (Sentence sen in file.sentences)
                 {
                     foreach (Pair w in sen.words)
                     {
@@ -112,7 +113,7 @@ namespace NovelAnalysis
         public List<WordInfo> getWordsByName(string keyword)
         {
             List<WordInfo> winfo = new List<WordInfo>();
-            foreach (var w in mainForm.dc.wordinfo)
+            foreach (var w in dc.wordinfo)
             {
                 if (w.word.IndexOf(keyword) >= 0)
                 {
@@ -130,7 +131,7 @@ namespace NovelAnalysis
         public List<WordInfo> getWordsByType(List<string> typeNames)
         {
             List<WordInfo> winfo = new List<WordInfo>();
-            foreach (var w in mainForm.dc.wordinfo)
+            foreach (var w in dc.wordinfo)
             {
                 foreach (var typeName in typeNames)
                 {
@@ -143,5 +144,128 @@ namespace NovelAnalysis
             }
             return winfo;
         }
+
+
+        public void setAnalysisSentences()
+        {
+
+        }
+
+
+
+        private static string getFlagChineseName(string flag)
+        {
+            string res = string.Empty;
+
+            //if (flag.IndexOf('n') == 0) res = "名词";
+            //else if (flag.IndexOf('a') == 0) res = "副词或形容词";
+            if (flag.IndexOf('v') == 0) res = "动词";
+
+            return res;
+        }
+
+        public string getVerbsInfo()
+        {
+            string res = "";
+
+            for (int i = 0; i < dc.fileinfo[0].sentences.Count; i++)
+            {
+                //res += string.Format("{0}-{1}:\r\n", dc.fileinfo[0].sentences[i].paragraphNumber, dc.fileinfo[0].sentences[i].sentenceNumber);
+                for (int j=0;j<dc.fileinfo[0].sentences[i].words.Count;j++)
+                {
+                    Pair w = dc.fileinfo[0].sentences[i].words[j];
+                    string flag = getFlagChineseName(w.Flag);
+                        if(flag=="动词"){
+                            if(j>=2)res+=string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j-2].Word, dc.fileinfo[0].sentences[i].words[j-2].Flag);
+                            if(j>=1)res+=string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j-1].Word, dc.fileinfo[0].sentences[i].words[j-1].Flag);
+                            res += string.Format("【{0}】", w.Word, flag);
+                            if(j<dc.fileinfo[0].sentences[i].words.Count-1)res+=string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j+1].Word, dc.fileinfo[0].sentences[i].words[j+1].Flag);
+                            if(j<dc.fileinfo[0].sentences[i].words.Count-2)res+=string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j+2].Word, dc.fileinfo[0].sentences[i].words[j+2].Flag);
+                            res+="\r\n";
+                        }else{
+                            //res += w.Word;
+                        }
+                                           
+                }
+                res += "\r\n";
+            }
+
+            return res;
+        }
+
+        public string getGsInfo()
+        {
+            string res = "";
+
+            for (int i = 0; i < dc.fileinfo[0].sentences.Count; i++)
+            {
+                //res += string.Format("{0}-{1}:\r\n", dc.fileinfo[0].sentences[i].paragraphNumber, dc.fileinfo[0].sentences[i].sentenceNumber);
+                for (int j = 0; j < dc.fileinfo[0].sentences[i].words.Count; j++)
+                {
+                    Pair w = dc.fileinfo[0].sentences[i].words[j];
+                    if (w.Flag.EndsWith("g"))
+                    {
+                        if (j >= 2) res += string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j - 2].Word, dc.fileinfo[0].sentences[i].words[j - 2].Flag);
+                        if (j >= 1) res += string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j - 1].Word, dc.fileinfo[0].sentences[i].words[j - 1].Flag);
+                        res += string.Format("【{0}】", w.Word);
+                        if (j < dc.fileinfo[0].sentences[i].words.Count - 1) res += string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j + 1].Word, dc.fileinfo[0].sentences[i].words[j + 1].Flag);
+                        if (j < dc.fileinfo[0].sentences[i].words.Count - 2) res += string.Format("({0}/{1})", dc.fileinfo[0].sentences[i].words[j + 2].Word, dc.fileinfo[0].sentences[i].words[j + 2].Flag);
+                        res += "\r\n";
+                    }
+                    else
+                    {
+                        //res += w.Word;
+                    }
+
+                }
+                res += "\r\n";
+            }
+
+            return res;
+        }
+
+        public string getWordInfo()
+        {
+            string res = "";
+
+
+            for (int i = 0; i < dc.fileinfo[0].sentences.Count; i++)
+            {
+                res += string.Format("{0}-{1}:\r\n", dc.fileinfo[0].sentences[i].paragraphNumber, dc.fileinfo[0].sentences[i].sentenceNumber);
+                string resstr = "";
+                int verbNumber = 0;
+                foreach (var w in dc.fileinfo[0].sentences[i].words)
+                {
+                    
+                    string flag = getFlagChineseName(w.Flag);
+                    if (w.Word == "，" || w.Word == "；")
+                    {
+                        if (verbNumber == 1)
+                        {
+                            resstr += string.Format("{0}\r\n", w.Word);
+                            res += resstr + "\r\n";
+                        }
+                        resstr = "";
+                        verbNumber = 0;
+                    }
+                    else if (string.IsNullOrEmpty(flag))
+                        resstr += w.Word;
+                    else if (flag=="动词")
+                    {
+                        resstr += string.Format("【{0}<{1}>】", w.Word, flag);
+                        verbNumber++;
+                    }
+                       
+                }
+                if (verbNumber != 1) resstr = "";
+                if(!string.IsNullOrWhiteSpace(resstr))
+                    res += resstr+"\r\n";
+            }
+
+           return res;
+        }
+
+
+
     }
 }

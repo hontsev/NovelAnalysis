@@ -72,6 +72,12 @@
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.label2 = new System.Windows.Forms.Label();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.开始分词ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.开始句法修正ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.开始句法修正ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -80,12 +86,14 @@
             this.panel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.文件ToolStripMenuItem,
+            this.操作ToolStripMenuItem,
             this.关于ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -107,28 +115,28 @@
             // 打开TXTToolStripMenuItem
             // 
             this.打开TXTToolStripMenuItem.Name = "打开TXTToolStripMenuItem";
-            this.打开TXTToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.打开TXTToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.打开TXTToolStripMenuItem.Text = "打开TXT";
             this.打开TXTToolStripMenuItem.Click += new System.EventHandler(this.打开TXTToolStripMenuItem_Click);
             // 
             // 打开JSONToolStripMenuItem
             // 
             this.打开JSONToolStripMenuItem.Name = "打开JSONToolStripMenuItem";
-            this.打开JSONToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.打开JSONToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.打开JSONToolStripMenuItem.Text = "打开JSON";
             this.打开JSONToolStripMenuItem.Click += new System.EventHandler(this.打开JSONToolStripMenuItem_Click);
             // 
             // 保存为JSONToolStripMenuItem
             // 
             this.保存为JSONToolStripMenuItem.Name = "保存为JSONToolStripMenuItem";
-            this.保存为JSONToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.保存为JSONToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.保存为JSONToolStripMenuItem.Text = "保存为JSON";
             this.保存为JSONToolStripMenuItem.Click += new System.EventHandler(this.保存为JSONToolStripMenuItem_Click);
             // 
             // 退出ToolStripMenuItem
             // 
             this.退出ToolStripMenuItem.Name = "退出ToolStripMenuItem";
-            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.退出ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.退出ToolStripMenuItem.Text = "退出";
             this.退出ToolStripMenuItem.Click += new System.EventHandler(this.退出ToolStripMenuItem_Click);
             // 
@@ -167,6 +175,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(0, 29);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -499,6 +508,57 @@
             this.label2.TabIndex = 4;
             this.label2.Text = "label2";
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.richTextBox2);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(1013, 342);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "分词结果";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // richTextBox2
+            // 
+            this.richTextBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.richTextBox2.Location = new System.Drawing.Point(6, 16);
+            this.richTextBox2.Name = "richTextBox2";
+            this.richTextBox2.ReadOnly = true;
+            this.richTextBox2.Size = new System.Drawing.Size(999, 320);
+            this.richTextBox2.TabIndex = 3;
+            this.richTextBox2.Text = "";
+            // 
+            // 操作ToolStripMenuItem
+            // 
+            this.操作ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.开始分词ToolStripMenuItem,
+            this.开始句法修正ToolStripMenuItem,
+            this.开始句法修正ToolStripMenuItem1});
+            this.操作ToolStripMenuItem.Name = "操作ToolStripMenuItem";
+            this.操作ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
+            this.操作ToolStripMenuItem.Text = "操作";
+            // 
+            // 开始分词ToolStripMenuItem
+            // 
+            this.开始分词ToolStripMenuItem.Name = "开始分词ToolStripMenuItem";
+            this.开始分词ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.开始分词ToolStripMenuItem.Text = "jieba分词";
+            this.开始分词ToolStripMenuItem.Click += new System.EventHandler(this.开始分词ToolStripMenuItem_Click);
+            // 
+            // 开始句法修正ToolStripMenuItem
+            // 
+            this.开始句法修正ToolStripMenuItem.Name = "开始句法修正ToolStripMenuItem";
+            this.开始句法修正ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.开始句法修正ToolStripMenuItem.Text = "谓语捕捉分词";
+            // 
+            // 开始句法修正ToolStripMenuItem1
+            // 
+            this.开始句法修正ToolStripMenuItem1.Name = "开始句法修正ToolStripMenuItem1";
+            this.开始句法修正ToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.开始句法修正ToolStripMenuItem1.Text = "开始句法修正";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -524,6 +584,7 @@
             this.panel1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -574,6 +635,12 @@
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.ToolStripMenuItem 操作ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 开始分词ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 开始句法修正ToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.RichTextBox richTextBox2;
+        private System.Windows.Forms.ToolStripMenuItem 开始句法修正ToolStripMenuItem1;
     }
 }
 

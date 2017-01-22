@@ -13,10 +13,14 @@ namespace NovelAnalysis
         public List<Sentence> appearSentences;
 
 
-        #region 实现比较接口的CompareTo方法
+        /// <summary>
+        /// 用于比较词频。降序。
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int CompareTo(object obj)
         {
-            //这里是按sum倒序
+            //这里是按sum降序
             int res = 0;
             try
             {
@@ -36,6 +40,5 @@ namespace NovelAnalysis
             }
             return res;
         }
-        #endregion
     }
 }

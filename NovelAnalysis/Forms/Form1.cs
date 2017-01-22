@@ -36,7 +36,7 @@ namespace NovelAnalysis
         //MyDelegate.sendVoidDelegate setFileInfoListEvent;
         //MyDelegate.sendVoidDelegate setWordInfoListEvent;
         //MyDelegate.sendStatusDelegate setControllersStatusEvent;
-
+        MyDelegate.sendStringDelegate printEvent;
         public WordCut wc;
         public DataController dc;
 
@@ -53,7 +53,8 @@ namespace NovelAnalysis
             tabControl1.Parent = this;
 
             dc = new DataController();
-            ana = new WordAnalysis(this);
+            ana = new WordAnalysis(this.dc);
+            printEvent = new MyDelegate.sendStringDelegate(print);
 
             //setFileInfoListEvent = new MyDelegate.sendVoidDelegate(setFileInfoList);
             //setWordInfoListEvent = new MyDelegate.sendVoidDelegate(setWordInfoList);
@@ -235,6 +236,20 @@ namespace NovelAnalysis
             }
         }
 
+        private void setWordsInfo()
+        {
+            if (richTextBox2.InvokeRequired)
+            {
+                MyDelegate.sendVoidDelegate mEvent = new MyDelegate.sendVoidDelegate(setWordsInfo);
+                Invoke(mEvent);
+            }
+            else
+            {
+                richTextBox2.Text = ana.getGsInfo();
+            }
+            
+        }
+
         /// <summary>
         /// 显示包含该词的句子信息
         /// </summary>
@@ -277,6 +292,8 @@ namespace NovelAnalysis
             }
         }
 
+
+
         /// <summary>
         /// 获取一个字符串中某个子串所有出现的位置
         /// </summary>
@@ -303,6 +320,7 @@ namespace NovelAnalysis
 
         #region 文件读取与存储
 
+
         /// <summary>
         /// 子线程读入文本文件
         /// </summary>
@@ -317,15 +335,17 @@ namespace NovelAnalysis
                 try
                 {
                     preContent = IOTools.TxtIOController.readTxtFile(thisFileName);
-                    print("读取完毕。");
+                    print("读取完毕。正在预处理，请等待。");
 
-                    wc = new WordCut(this, preContent);
+                    wc = new WordCut(this.dc, preContent, printEvent);
 
                     //分割文本
                     wc.workCutSentence();
 
                     //分词
                     wc.workCutString();
+
+                    
 
                     //生成文件信息
                     FileInfo finfo = new FileInfo();
@@ -335,10 +355,11 @@ namespace NovelAnalysis
                     finfo.characterNum = preContent.Length;
                     finfo.paragraphNum = dc.preResult.Count;
                     finfo.sentenceNum = dc.sentences.Count;
-                    finfo.sentneces = dc.sentences.ToArray();
+                    finfo.sentences = dc.sentences;
 
                     dc.fileinfo.Add(finfo);
                     setFileInfoList();
+                    
                 }
                 catch (Exception ex)
                 {
@@ -346,9 +367,16 @@ namespace NovelAnalysis
                 }
             }
             //修正分词结果
-            wc.workResetWordCut();
+            //workResetWordCutwc.workResetWordCut();
+
+            //句子排序
+            wc.workSortSentences();
+
             setControllersStatus(Status.readed);
             setFileInfoList();
+            setWordsInfo();
+
+            print("预处理完毕。");
         }
 
 
@@ -405,9 +433,9 @@ namespace NovelAnalysis
             ana.initAnalysis();
             foreach (FileInfo file in dc.fileinfo)
             {
-                foreach (Sentence sen in file.sentneces)
+                foreach (Sentence sen in file.sentences)
                 {
-                    print("词频统计（第" + (dc.fileinfo.IndexOf(file) + 1) + "篇" + (file.sentneces.ToList().IndexOf(sen) + 1) + "句)");
+                    print("词频统计（第" + (dc.fileinfo.IndexOf(file) + 1) + "篇" + (file.sentences.ToList().IndexOf(sen) + 1) + "句)");
                     foreach (Pair w in sen.words)
                     {
                         if (w.Flag != "x")
@@ -421,6 +449,7 @@ namespace NovelAnalysis
             print("分析结束");
             setControllersStatus(Status.anaedWord);
             setWordInfoList();
+            
         }
 
         /// <summary>
@@ -580,6 +609,11 @@ namespace NovelAnalysis
                 wordinfo = ana.getWordsByName(keyword);
                 setWordInfoList();
             }
+        }
+
+        private void 开始分词ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

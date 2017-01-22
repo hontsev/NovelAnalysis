@@ -34,7 +34,7 @@ namespace NovelAnalysis
         }
 
         public MultiThreadingController(MyDelegate.sendIntDelegate workCallback)
-            :this(0, workCallback, 1)
+            :this(0, workCallback,1)
         {
         }
 
