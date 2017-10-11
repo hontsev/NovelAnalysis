@@ -9,6 +9,7 @@ using JiebaNet.Segmenter;
 using System.Threading;
 using System.Text.RegularExpressions;
 using JiebaNet.Segmenter.PosSeg;
+using Microsoft.VisualBasic;
 
 namespace NovelAnalysis
 {
@@ -43,8 +44,9 @@ namespace NovelAnalysis
             string res = ori;
             foreach (var b in blanks) res = res.Replace(b,string.Empty);
             return res;
-
         }
+
+
 
         /// <summary>
         /// 子线程分割文本为段落、单句
@@ -62,7 +64,7 @@ namespace NovelAnalysis
                 foreach (var ress in res)
                 {
                     if (ress.ToString().Length >= 2)
-                        thisparag.Add(ress.ToString());
+                        thisparag.Add(ChineseStringUtility.ToSimplified(ress.ToString()));
                 }
                 if (thisparag.Count == 0) continue;
                 dc.preResult.Add(thisparag);

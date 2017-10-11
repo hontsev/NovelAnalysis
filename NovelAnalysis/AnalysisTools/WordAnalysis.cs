@@ -85,9 +85,10 @@ namespace NovelAnalysis
         /// </summary>
         /// <param name="itemStr"></param>
         /// <returns></returns>
-        public List<string> getItemStrings(string itemStr)
+        public string[,] getItemStrings(string itemStr)
         {
             List<string> res = new List<string>();
+            List<string> resFrom = new List<string>();
             foreach (FileInfo file in dc.fileinfo)
             {
                 foreach (Sentence sen in file.sentences)
@@ -97,12 +98,19 @@ namespace NovelAnalysis
                         if (w.Word == itemStr)
                         {
                             res.Add(getSentenseString(sen));
+                            resFrom.Add(file.fileName);
                             break;
                         }
                     }
                 }
             }
-            return res;
+            string[,] resdata = new string[res.Count, 2];
+            for(int i = 0; i < res.Count; i++)
+            {
+                resdata[i, 0] = res[i];
+                resdata[i, 1] = resFrom[i];
+            }
+            return resdata;
         }
 
         /// <summary>

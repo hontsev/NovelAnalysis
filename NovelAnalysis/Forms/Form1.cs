@@ -13,7 +13,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json;
-
+using NovelAnalysis.AnalysisTools;
 
 namespace NovelAnalysis
 {
@@ -163,6 +163,24 @@ namespace NovelAnalysis
             }
         }
 
+
+        /// <summary>
+        /// 打印文章概要
+        /// </summary>
+        /// <param name="str"></param>
+        private void printChangeResult(string str)
+        {
+            if (textBox4.InvokeRequired)
+            {
+                MyDelegate.sendStringDelegate printTextEvent = new MyDelegate.sendStringDelegate(printChangeResult);
+                Invoke(printTextEvent, (object)(str));
+            }
+            else
+            {
+                textBox4.Text = str;
+            }
+        }
+
         /// <summary>
         /// 更新文件列表信息
         /// </summary>
@@ -259,34 +277,35 @@ namespace NovelAnalysis
             {
                 var item = listView1.SelectedItems[0];
                 string wordStr = item.Text.ToString();
-                List<string> res = ana.getItemStrings(wordStr);
+                string[,] res = ana.getItemStrings(wordStr);
                 richTextBox1.Text = "";
-                foreach (var s in res)
+                for(int i = 0; i < res.GetLength(0); i++)
                 {
                     Regex r = new Regex(wordStr);
-                    var begins = getIndexes(s, wordStr);
-                    for (int i = 0; i < s.Length; i++)
+                    var begins = getIndexes(res[i,0], wordStr);
+                    for (int j = 0; j < res[i,0].Length; j++)
                     {
-                        if (begins.IndexOf(i) >= 0)
+                        if (begins.IndexOf(j) >= 0)
                         {
                             richTextBox1.SelectionStart = richTextBox1.TextLength;
                             richTextBox1.SelectionLength = 0;
                             richTextBox1.SelectionColor = Color.Red;
-                            for (int j = 0; j < wordStr.Length; j++)
+                            for (int k = 0; k < wordStr.Length; k++)
                             {
-                                richTextBox1.AppendText(s[i].ToString());
-                                i++;
+                                richTextBox1.AppendText(res[i,0][j].ToString());
+                                j++;
                             }
-                            i--;
+                            j--;
                         }
                         else
                         {
                             richTextBox1.SelectionColor = richTextBox1.ForeColor;
-                            richTextBox1.AppendText(s[i].ToString());
+                            richTextBox1.AppendText(res[i, 0][j].ToString());
                         }
                     }
 
                     richTextBox1.SelectionColor = richTextBox1.ForeColor;
+                    richTextBox1.AppendText(" - (" + res[i, 1] + ")");
                     richTextBox1.AppendText("\r\n\r\n");
                 }
             }
@@ -528,6 +547,7 @@ namespace NovelAnalysis
             setFileInfo();
             dc.fileinfo.Remove(dc.fileinfo[listBox1.SelectedIndex]);
             setFileInfoList();
+            setControllersStatus(Status.readed);
         }
 
         private void 打开JSONToolStripMenuItem_Click(object sender, EventArgs e)
@@ -614,6 +634,148 @@ namespace NovelAnalysis
         private void 开始分词ToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+
+        private void workChangeWords()
+        {
+            string text1 = textBox1.Text;
+            string text2 = textBox3.Text;
+            print("开始分析文本1");
+            var res = WordCutTool.cut(text1);
+            var verbs = WordCutTool.sumPair(res, "V");
+            var nones = WordCutTool.sumPair(res, "N");
+            var adjs = WordCutTool.sumPair(res, "A");
+
+            print("开始分析文本2");
+            var res2 = WordCutTool.cut(text2);
+            var verbs2 = WordCutTool.sumPair(res2, "V");
+            var nones2 = WordCutTool.sumPair(res2, "N");
+            var adjs2 = WordCutTool.sumPair(res2, "A");
+
+            List<NumPair[]> changeres = new List<NumPair[]>();
+            for(int i = 0; i < verbs.Count; i++)
+            {
+                NumPair[] c = new NumPair[2];
+                c[0] = verbs[i];
+                if (verbs2.Count > i) c[1] = verbs2[i];
+                else c[1] = c[0];
+                changeres.Add(c);
+
+
+            }
+            for(int i = 0; i < nones.Count; i++)
+            {
+                NumPair[] c = new NumPair[2];
+                c[0] = nones[i];
+                if (nones2.Count > i) c[1] = nones2[i];
+                else c[1] = c[0];
+                changeres.Add(c);
+            }
+            for (int i = 0; i < adjs.Count; i++)
+            {
+                NumPair[] c = new NumPair[2];
+                c[0] = adjs[i];
+                if (adjs2.Count > i) c[1] = adjs2[i];
+                else c[1] = c[0];
+                changeres.Add(c);
+            }
+
+            List<Pair> respair = new List<Pair>();
+            foreach(var w in res)
+            {
+                bool change = false;
+                foreach(var wp in changeres)
+                {
+                    if(w.Flag==wp[0].flag && w.Word == wp[0].word)
+                    {
+                        respair.Add(new Pair(wp[1].word, wp[1].flag));
+                        change = true;
+                        break;
+                    }
+                }
+                if (!change) respair.Add(w);
+            }
+            printChangeResult(WordCutTool.getString(respair));
+            //print();
+            print("分析结束");
+        }
+
+        public void analysisTest1()
+        {
+            string text1 = textBox1.Text;
+            var res = WordCutTool.cut(text1);
+
+            List<Pair> out1 = new List<Pair>();
+            foreach (var w in res)
+            {
+                //if (w.Flag.ToUpper().StartsWith("V")) out1.Add(new Pair("[ V " + w.Word + " ]", "v"));
+                //else if (w.Flag.ToUpper().StartsWith("N")) out1.Add(new Pair("[ N " + w.Word + " ]", "n"));
+                //else if (w.Flag.ToUpper().StartsWith("A")) out1.Add(new Pair("[ A " + w.Word + " ]", "a"));
+                // else if (w.Flag.ToUpper().StartsWith("D")) out1.Add(new Pair("[D" + w.Word + "]", "d"));
+                if (w.Flag == "x" && ("，。？！…—；,.?!()（）“”‘’\r\n\t ".Contains(w.Word) || w.Word.Length<=0) )
+                {
+                    out1.Add(new Pair(" [" + w.Word + "/" + w.Flag + "]\r\n\r\n", ""));
+                }
+                else
+                {
+                    out1.Add(new Pair(" [" + w.Word + "/" + w.Flag + "]", ""));
+                }
+                    
+            }
+            printChangeResult(WordCutTool.getString(out1));
+        }
+
+        public void analysisTest2()
+        {
+            string text1 = textBox1.Text;
+            
+
+            var res = WordCutTool.cut(text1);
+
+            List<Pair> out1 = new List<Pair>();
+            List<NumPair> verbs = WordCutTool.sumPair(res, "V");
+            foreach (var v in verbs)
+            {
+                for (int i = 1; i < res.Count - 1; i++)
+                {
+                    if (res[i].Flag == v.flag && res[i].Word == v.word)
+                    {
+                        //verb
+                        out1.Add(new Pair(string.Format("{0}\t{1}\t{2}\r\n", res[i - 1].Flag, res[i].Word, res[i + 1].Flag), ""));
+                    }
+                }
+            }
+
+
+            printChangeResult(WordCutTool.getString(out1));
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            new Thread(workChangeWords).Start();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            analysisTest1();
+
+        }
+
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control == true && e.KeyCode == Keys.A)
+            {
+                textBox1.SelectAll();
+            }
+        }
+
+        private void textBox3_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control == true && e.KeyCode == Keys.A)
+            {
+                textBox3.SelectAll();
+            }
         }
     }
 }
