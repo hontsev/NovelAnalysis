@@ -129,6 +129,8 @@ namespace NovelAnalysis
         }
 
 
+        
+
         /// <summary>
         /// 输出到信息栏
         /// </summary>
@@ -162,7 +164,6 @@ namespace NovelAnalysis
                 textBoxSummary.Text =  str + "\r\n……";
             }
         }
-
 
         /// <summary>
         /// 打印文章概要
@@ -653,10 +654,10 @@ namespace NovelAnalysis
             var nones2 = WordCutTool.sumPair(res2, "N");
             var adjs2 = WordCutTool.sumPair(res2, "A");
 
-            List<NumPair[]> changeres = new List<NumPair[]>();
+            List<WordPair[]> changeres = new List<WordPair[]>();
             for(int i = 0; i < verbs.Count; i++)
             {
-                NumPair[] c = new NumPair[2];
+                WordPair[] c = new WordPair[2];
                 c[0] = verbs[i];
                 if (verbs2.Count > i) c[1] = verbs2[i];
                 else c[1] = c[0];
@@ -666,7 +667,7 @@ namespace NovelAnalysis
             }
             for(int i = 0; i < nones.Count; i++)
             {
-                NumPair[] c = new NumPair[2];
+                WordPair[] c = new WordPair[2];
                 c[0] = nones[i];
                 if (nones2.Count > i) c[1] = nones2[i];
                 else c[1] = c[0];
@@ -674,22 +675,22 @@ namespace NovelAnalysis
             }
             for (int i = 0; i < adjs.Count; i++)
             {
-                NumPair[] c = new NumPair[2];
+                WordPair[] c = new WordPair[2];
                 c[0] = adjs[i];
                 if (adjs2.Count > i) c[1] = adjs2[i];
                 else c[1] = c[0];
                 changeres.Add(c);
             }
 
-            List<Pair> respair = new List<Pair>();
+            List<WordPair> respair = new List<WordPair>();
             foreach(var w in res)
             {
                 bool change = false;
                 foreach(var wp in changeres)
                 {
-                    if(w.Flag==wp[0].flag && w.Word == wp[0].word)
+                    if(w.Flag==wp[0].Flag && w.Word == wp[0].Word)
                     {
-                        respair.Add(new Pair(wp[1].word, wp[1].flag));
+                        respair.Add(new WordPair(wp[1].Word, wp[1].Flag));
                         change = true;
                         break;
                     }
@@ -706,7 +707,7 @@ namespace NovelAnalysis
             string text1 = textBox1.Text;
             var res = WordCutTool.cut(text1);
 
-            List<Pair> out1 = new List<Pair>();
+            List<WordPair> out1 = new List<WordPair>();
             foreach (var w in res)
             {
                 //if (w.Flag.ToUpper().StartsWith("V")) out1.Add(new Pair("[ V " + w.Word + " ]", "v"));
@@ -715,11 +716,11 @@ namespace NovelAnalysis
                 // else if (w.Flag.ToUpper().StartsWith("D")) out1.Add(new Pair("[D" + w.Word + "]", "d"));
                 if (w.Flag == "x" && ("，。？！…—；,.?!()（）“”‘’\r\n\t ".Contains(w.Word) || w.Word.Length<=0) )
                 {
-                    out1.Add(new Pair(" [" + w.Word + "/" + w.Flag + "]\r\n\r\n", ""));
+                    out1.Add(new WordPair(" [" + w.Word + "/" + w.Flag + "]\r\n\r\n", ""));
                 }
                 else
                 {
-                    out1.Add(new Pair(" [" + w.Word + "/" + w.Flag + "]", ""));
+                    out1.Add(new WordPair(" [" + w.Word + "/" + w.Flag + "]", ""));
                 }
                     
             }
@@ -733,22 +734,217 @@ namespace NovelAnalysis
 
             var res = WordCutTool.cut(text1);
 
-            List<Pair> out1 = new List<Pair>();
-            List<NumPair> verbs = WordCutTool.sumPair(res, "V");
+            List<WordPair> out1 = new List<WordPair>();
+            List<WordPair> verbs = WordCutTool.sumPair(res, "V");
             foreach (var v in verbs)
             {
                 for (int i = 1; i < res.Count - 1; i++)
                 {
-                    if (res[i].Flag == v.flag && res[i].Word == v.word)
+                    if (res[i].Flag == v.Flag && res[i].Word == v.Word)
                     {
                         //verb
-                        out1.Add(new Pair(string.Format("{0}\t{1}\t{2}\r\n", res[i - 1].Flag, res[i].Word, res[i + 1].Flag), ""));
+                        out1.Add(new WordPair(string.Format("{0}\t{1}\t{2}\r\n", res[i - 1].Flag, res[i].Word, res[i + 1].Flag), ""));
                     }
                 }
             }
 
 
             printChangeResult(WordCutTool.getString(out1));
+        }
+
+        //public void analysisTest3()
+        //{
+        //    string path = @"D:\文档\人工智能\语料\聊天机器人词库\纯化\";
+        //    string[] files = Directory.GetFiles(path);
+        //    string outfile = path + @"result.txt";
+        //    Dictionary<string, string> dir = new Dictionary<string, string>();
+        //    foreach(string file in files)
+        //    {
+        //        string[] res = File.ReadAllLines(file,Encoding.Default);
+        //        List<string> reslist = new List<string>();
+        //        for(int i = 0; i < res.Length; i++)
+        //        {
+
+        //            if (!string.IsNullOrWhiteSpace(res[i]))
+        //            {
+        //                reslist.Add(res[i]);
+        //            }
+        //            else
+        //            {
+        //                if (reslist.Count >= 2)
+        //                {
+        //                    if (reslist[0].Contains("[") && reslist[0].Contains("]")) { reslist.Clear(); continue; }
+        //                    reslist[0] = reslist[0].Replace("[name]", "你").Replace("[cqname]", "我").Replace("[enter]"," ");
+        //                    reslist[1] = reslist[1].Replace("[name]", "你").Replace("[cqname]", "我").Replace("[enter]", " ");
+        //                    reslist[1] = Regex.Replace(reslist[1], @"\[.*?\]", "");
+        //                    if (dir.ContainsKey(reslist[0]))
+        //                    {
+        //                        //have it
+        //                        if (reslist[0].Length > dir[reslist[0]].Length)
+        //                        {
+        //                            if (reslist[1].Contains("http")) { reslist.Clear(); continue; }
+        //                            //change
+        //                            dir[reslist[0]] = reslist[1];
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        //dont have
+        //                        dir[reslist[0]] = reslist[1];
+        //                    }
+
+        //                }
+        //                reslist.Clear();
+
+        //            }
+
+        //        }
+        //    }
+        //    using(FileStream fs=new FileStream(outfile, FileMode.Create))
+        //    {
+        //        using(StreamWriter sw=new StreamWriter(fs,Encoding.UTF8))
+        //        {
+        //            foreach (var k in dir)
+        //            {
+        //                sw.WriteLine(string.Format("{0}\r\n{1}\r\n",k.Key,k.Value));
+        //            }
+        //        }
+        //    }
+
+        //}
+
+        //private void analysisTest4()
+        //{
+        //    string file = @"D:\文档\人工智能\语料\聊天机器人词库\纯化\result.txt";
+        //    //Dictionary<string, List<Pair>> dir = new Dictionary<string, List<Pair>>();
+        //    string[] res = File.ReadAllLines(file, Encoding.UTF8);
+
+
+        //    string resstr = "";
+        //    for (int i = 0; i < res.Length; i++)
+        //    {
+        //        string key = res[i++];
+        //        string value = res[i++];
+        //        List<Pair> valueWords = WordCutTool.cut(value);
+
+        //        resstr += string.Format("{0}\t{1}\t{2}\r\n", key, value, 1);
+        //        foreach (var p in valueWords)
+        //        {
+        //            if (p.Flag.StartsWith("n") || p.Flag.StartsWith("v") || p.Flag.StartsWith("a"))
+        //            {
+        //                resstr += string.Format("{0}\t{1}\t{2}\r\n", value, p.Word, 2);
+        //            }
+        //        }
+        //        //dir[key] = valueWords;
+        //        if (i > 1000) break;
+        //    }
+
+        //    printChangeResult(resstr);
+
+        //}
+
+        private void analysis5()
+        {
+            var res=WordCutTool.cutSentence(textBox1.Text);
+            string output = "";
+
+            foreach(var sen in res)
+            {
+                foreach(var w in sen)
+                {
+
+                    if (w.Flag.ToUpper().StartsWith("N") || w.Flag.ToUpper().StartsWith("R")) output += "[" + w.Word + "]";
+                    else if (w.Flag.ToUpper().StartsWith("V")) output += "" + w.Word + "";
+                    else if (w.Flag.ToUpper().StartsWith("U")) ;
+                    else output += w.Word + w.Flag;
+                }
+                output += "\r\n\r\n";
+            }
+
+            printChangeResult(output);
+        }
+
+        private void analysisTF()
+        {
+            string str = textBox1.Text;
+            List<WordPair> words = AnalyzeTool.getTFWithSort(str, true);
+
+            string output = "";
+            foreach (var w in words)
+            {
+                output += string.Format("{0} {1} {2}\r\n", w.Word, w.Flag, w.Num);
+            }
+            printChangeResult(output);
+
+        }
+
+        /// <summary>
+        /// 文档词频预处理，得到一个文件 WordDFs.txt
+        /// </summary>
+        private void analysisDF()
+        {
+            string path = AnalyzeTool.dataDic;
+            string[] files = Directory.GetFiles(path, "*.txt");
+            for (int i = 0; i < files.Length; i++)
+            {
+                string f = files[i];
+                var dfs = AnalyzeTool.loadDF();
+                dfs = AnalyzeTool.getIDF(dfs, new string[] { f });
+                AnalyzeTool.saveDF(dfs);
+                print(string.Format("完成：{0}({1}/{2})", f, i + 1, files.Length));
+
+                string tpath = "./backup/";
+                if (!Directory.Exists(tpath)) Directory.CreateDirectory(tpath);
+                File.Move(f, tpath + Path.GetFileName(f));
+            }
+            print(string.Format("over.({0})",files.Length));
+        }
+
+        private void analysisTFIDF()
+        {
+            string content = textBox1.Text;
+            var dfs = AnalyzeTool.loadDF();
+            var words=AnalyzeTool.getTFIDF(content, dfs);
+            string output = "";
+            foreach(var w in words)
+            {
+                output += string.Format("{0}-{1}\r\n", w.Word, w.Num);
+            }
+            printChangeResult(output);
+        }
+
+        private void addtoForbiddenWord()
+        {
+            string[] input = textBox1.Text.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            string filename = "ForbiddenWords.txt";
+            if (!File.Exists(filename)) File.Create(filename);
+            string[] oldwords = File.ReadAllLines(filename, Encoding.UTF8);
+            Dictionary<string, bool> dic = new Dictionary<string, bool>();
+            foreach (var v in oldwords) dic[v.Trim()] = true;
+            foreach (var v2 in input) dic[v2.Trim()] = true;
+            string output = "";
+            foreach (var k in dic.Keys) output += k + "\r\n";
+            File.WriteAllText(filename, output);
+            printChangeResult(DateTime.Now.ToShortDateString());
+        }
+
+        private void formatinfos()
+        {
+            string source = @"D:\CProjects\WebsiteGetter\WebsiteGetter\bin\Debug\tmp\20171027.txt";
+            Dictionary<string, string> data = new Dictionary<string, string>();
+            string[] datas = File.ReadAllLines(source,Encoding.Default);
+            for(int i = 0; i < datas.Length; i += 5)
+            {
+                string name = datas[i];
+                string email = datas[i + 1];
+                if(!string.IsNullOrWhiteSpace(email)) data[email] = name;
+            }
+            string output = "";
+            foreach(var d in data)
+            {
+                output += d.Value + "," + d.Key + "\r\n";
+            }
+            printChangeResult(output);
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -758,7 +954,7 @@ namespace NovelAnalysis
 
         private void button4_Click(object sender, EventArgs e)
         {
-            analysisTest1();
+           
 
         }
 
@@ -776,6 +972,16 @@ namespace NovelAnalysis
             {
                 textBox3.SelectAll();
             }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            new Thread(analysisDF).Start();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            new Thread(analysisTFIDF).Start();
         }
     }
 }

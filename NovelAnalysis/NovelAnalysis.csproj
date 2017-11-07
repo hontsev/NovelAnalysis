@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -67,7 +68,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisTools\ChineseStringUtility.cs" />
+    <Compile Include="AnalysisTools\CompareTool.cs" />
+    <Compile Include="AnalysisTools\ICTCLAS.cs" />
+    <Compile Include="AnalysisTools\IllegalWordDetection.cs" />
     <Compile Include="AnalysisTools\SentenceAnalysis.cs" />
+    <Compile Include="AnalysisTools\AnalyzeTool.cs" />
     <Compile Include="AnalysisTools\WordCutTool.cs" />
     <Compile Include="Forms\AboutBox1.cs">
       <SubType>Form</SubType>
@@ -121,6 +126,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\3500个常用汉字表.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

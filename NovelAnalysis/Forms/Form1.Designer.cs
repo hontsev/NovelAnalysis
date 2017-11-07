@@ -75,6 +75,7 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.button4 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
@@ -83,7 +84,8 @@
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.label2 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -572,6 +574,8 @@
             // 
             // tabPage4
             // 
+            this.tabPage4.Controls.Add(this.button6);
+            this.tabPage4.Controls.Add(this.button5);
             this.tabPage4.Controls.Add(this.button4);
             this.tabPage4.Controls.Add(this.button3);
             this.tabPage4.Controls.Add(this.textBox4);
@@ -584,9 +588,19 @@
             this.tabPage4.Text = "内容替换";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(640, 52);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(122, 32);
+            this.button4.TabIndex = 6;
+            this.button4.Text = "分析文本1";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(901, 14);
+            this.button3.Location = new System.Drawing.Point(640, 14);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(122, 32);
             this.button3.TabIndex = 5;
@@ -599,13 +613,13 @@
             this.textBox4.AcceptsReturn = true;
             this.textBox4.AcceptsTab = true;
             this.textBox4.AllowDrop = true;
-            this.textBox4.Location = new System.Drawing.Point(901, 52);
+            this.textBox4.Location = new System.Drawing.Point(768, 14);
             this.textBox4.MaxLength = 99999999;
             this.textBox4.Multiline = true;
             this.textBox4.Name = "textBox4";
             this.textBox4.ReadOnly = true;
             this.textBox4.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox4.Size = new System.Drawing.Size(426, 376);
+            this.textBox4.Size = new System.Drawing.Size(577, 414);
             this.textBox4.TabIndex = 2;
             this.textBox4.TabStop = false;
             // 
@@ -615,12 +629,12 @@
             this.textBox3.AcceptsTab = true;
             this.textBox3.AllowDrop = true;
             this.textBox3.HideSelection = false;
-            this.textBox3.Location = new System.Drawing.Point(452, 14);
+            this.textBox3.Location = new System.Drawing.Point(326, 14);
             this.textBox3.MaxLength = 99999999;
             this.textBox3.Multiline = true;
             this.textBox3.Name = "textBox3";
             this.textBox3.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox3.Size = new System.Drawing.Size(421, 414);
+            this.textBox3.Size = new System.Drawing.Size(308, 414);
             this.textBox3.TabIndex = 1;
             this.textBox3.TabStop = false;
             this.textBox3.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox3_KeyDown);
@@ -636,7 +650,7 @@
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(422, 414);
+            this.textBox1.Size = new System.Drawing.Size(312, 414);
             this.textBox1.TabIndex = 0;
             this.textBox1.TabStop = false;
             this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
@@ -673,15 +687,25 @@
             this.label2.TabIndex = 4;
             this.label2.Text = "label2";
             // 
-            // button4
+            // button5
             // 
-            this.button4.Location = new System.Drawing.Point(1029, 14);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(122, 32);
-            this.button4.TabIndex = 6;
-            this.button4.Text = "分析文本1";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button5.Location = new System.Drawing.Point(640, 396);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(122, 32);
+            this.button5.TabIndex = 7;
+            this.button5.Text = "文本词频预分析";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(640, 358);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(122, 32);
+            this.button6.TabIndex = 8;
+            this.button6.Text = "TFIDF分析";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // Form1
             // 
@@ -774,6 +798,8 @@
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button button5;
     }
 }
 

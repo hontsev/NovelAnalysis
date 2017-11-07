@@ -9,9 +9,6 @@ namespace NovelAnalysis
 {
     public static class ChineseStringUtility
     {
-        internal const int LOCALE_SYSTEM_DEFAULT = 0x0800;
-        internal const int LCMAP_SIMPLIFIED_CHINESE = 0x02000000;
-        internal const int LCMAP_TRADITIONAL_CHINESE = 0x04000000;
 
         /// <summary>
         /// 去掉异体字
@@ -25,22 +22,37 @@ namespace NovelAnalysis
             try
             {
                 string[] pairs = File.ReadAllText(Directory.GetCurrentDirectory() + @"\v2t.txt").Split('|');
-                Dictionary<string, string> changepairs = new Dictionary<string, string>();
+                string v = "";
+                string t = "";
+                //Dictionary<char, char> changepairs = new Dictionary<char, char>();
                 foreach (var p in pairs)
                 {
                     string[] pair = p.Split(',');
-                    if (!changepairs.ContainsKey(pair[1]))
-                    {
-                        changepairs[pair[1]] = pair[0];
-                    }
+                    v += pair[1];
+                    t += pair[0];
+                    //if (!changepairs.ContainsKey(pair[1][0]))
+                    //{
+                    //    changepairs[pair[1][0]] = pair[0][0];
+                    //}
                 }
                 string tmp = "";
-                foreach (var c in res)
+                char c;
+                int index = 0;
+                StringBuilder sb = new StringBuilder(res.Length);
+                for(int i = 0; i < res.Length; i++)
                 {
-                    if (changepairs.ContainsKey(c.ToString())) tmp += changepairs[c.ToString()];
-                    else tmp += c;
+                    c = res[i];
+                    index = v.IndexOf(c);
+                    if (index > 0)
+                        sb.Append(t[index]);
+                    else
+                        sb.Append(c);
+
+                    //tmp += c;
+                    //if (changepairs.ContainsKey(c)) tmp += changepairs[c];
+                    //else tmp += c;
                 }
-                res = tmp;
+                res = sb.ToString();
             }
             catch
             {
@@ -63,22 +75,29 @@ namespace NovelAnalysis
             try
             {
                 string[] pairs = File.ReadAllText(Directory.GetCurrentDirectory() + @"\s2t.txt").Split('|');
-                Dictionary<string, string> changepairs = new Dictionary<string, string>();
+                string s = "";
+                string t = "";
+                //Dictionary<string, string> changepairs = new Dictionary<string, string>();
                 foreach(var p in pairs)
                 {
                     string[] pair = p.Split(',');
-                    if (!changepairs.ContainsKey(pair[1]))
-                    {
-                        changepairs[pair[1]] = pair[0];
-                    }
+                    s += pair[0];
+                    t += pair[1];
+                    //if (!changepairs.ContainsKey(pair[1]))
+                    //{
+                    //    changepairs[pair[1]] = pair[0];
+                    //}
                 }
-                string tmp = "";
+                StringBuilder sb = new StringBuilder(res.Length);
                 foreach(var c in res)
                 {
-                    if (changepairs.ContainsKey(c.ToString())) tmp += changepairs[c.ToString()];
-                    else tmp += c;
+                    //if (changepairs.ContainsKey(c.ToString())) tmp += changepairs[c.ToString()];
+                    //else tmp += c;
+                    int index = t.IndexOf(c);
+                    if (index >= 0) sb.Append(s[index]);
+                    else sb.Append(c);
                 }
-                res = tmp;
+                res = sb.ToString();
             }
             catch
             {
@@ -103,3 +122,4 @@ namespace NovelAnalysis
         }
     }
 }
+

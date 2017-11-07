@@ -38,7 +38,7 @@ namespace NovelAnalysis
             }
         }
 
-        private static string removeBlanks(string ori)
+        public static string removeBlanks(string ori)
         {
             string[] blanks = { "\t", " ", "　", "\r" };
             string res = ori;

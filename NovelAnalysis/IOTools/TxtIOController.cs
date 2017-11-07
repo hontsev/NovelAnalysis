@@ -7,17 +7,71 @@ using Mozilla.NUniversalCharDet;
 using System.Threading;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using NovelAnalysis.Properties;
 
 namespace NovelAnalysis.IOTools
 {
     public class TxtIOController
     {
         /// <summary>
+        /// 常见汉字个数
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        private static int getCommonHanNum(string str)
+        {
+            int count = 0;
+
+            foreach (char c in str)
+            {
+                if (Resources.commonChineseWords.Contains(c)) count++;
+            }
+
+            return count;
+        }
+
+        private static byte[] readByte(string filepath, long begin=0, long len=2000)
+        {
+            byte[] buffer = new byte[len];
+            using (FileStream fs = File.Open(filepath, FileMode.Open))
+            {
+                fs.Seek(begin, SeekOrigin.Begin);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    int read = fs.Read(buffer, 0, buffer.Length);
+                }
+            }
+            return buffer;
+        }
+
+        public static Encoding getEncoding2(string fileName)
+        {
+            Encoding encoding= Encoding.Default;
+
+            List<string> encodings = new List<string> { "gb2312", "utf-8", "big5" };
+            
+            byte[] test = readByte(fileName);
+            int maxhannum = getCommonHanNum(encoding.GetString(test));
+            foreach(var enc in encodings)
+            {
+                string str = Encoding.GetEncoding(enc).GetString(test);
+                int thishannum = getCommonHanNum(str);
+                if (maxhannum < thishannum)
+                {
+                    maxhannum = thishannum;
+                    encoding = Encoding.GetEncoding(enc);
+                }
+            }
+
+            return encoding;
+        }
+
+        /// <summary>
         /// 返回流的编码格式
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
-        private static Encoding getEncoding(string streamName)
+        public static Encoding getEncoding(string streamName)
         {
             Encoding encoding = Encoding.Default;
             using (Stream stream = new FileStream(streamName, FileMode.Open))
