@@ -21,3 +21,6 @@
 /NovelAnalysis/bin/Debug/nunit.framework.dll
 /NovelAnalysis/bin/Debug/nunit.framework.xml
 /NovelAnalysis/bin/Debug/NUniversalCharDet.dll
+/新建文件夹
+/packages
+/NovelAnalysis/*.csproj
